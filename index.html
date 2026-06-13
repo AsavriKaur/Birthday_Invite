@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birthday Invitation 🎂</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fff0f6;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    #app {
+      width: 100%;
+      max-width: 480px;
+      min-height: 420px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+      width: 100%;
+      background: #fff;
+      border-radius: 20px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 4px 32px rgba(212, 83, 126, 0.12);
+      text-align: center;
+    }
+    .screen.active { display: flex; }
+
+    h1 { font-size: 1.5rem; font-weight: 600; color: #2c2c2a; }
+    p  { font-size: 1rem; color: #5f5e5a; }
+
+    .emoji-big   { font-size: 3.5rem; }
+    .emoji-med   { font-size: 2.5rem; }
+    .confetti-row { font-size: 2rem; letter-spacing: 6px; animation: bounce 0.8s ease-in-out infinite alternate; }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to   { transform: translateY(-8px); }
+    }
+
+    input[type=text] {
+      width: 100%;
+      padding: 11px 16px;
+      font-size: 1rem;
+      border-radius: 10px;
+      border: 1.5px solid #f0bbd0;
+      outline: none;
+      transition: border-color 0.2s;
+      background: #fff8fb;
+      color: #2c2c2a;
+    }
+    input[type=text]:focus { border-color: #d4537e; }
+
+    .btn-primary {
+      background: #d4537e;
+      color: #fff;
+      border: none;
+      padding: 11px 32px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-primary:hover  { opacity: 0.88; }
+    .btn-primary:active { transform: scale(0.97); }
+
+    .btn-link {
+      background: none;
+      border: none;
+      color: #888780;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    /* Yes/No buttons */
+    .yesno-wrap {
+      position: relative;
+      width: 284px;
+      height: 56px;
+    }
+
+    .btn-yes, .btn-no {
+      width: 130px;
+      padding: 12px 0;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid #ccc;
+      transition: opacity 0.15s;
+      position: absolute;
+      top: 0;
+    }
+    .btn-yes {
+      background: #639922;
+      color: #fff;
+      border-color: #639922;
+      left: 0;
+    }
+    .btn-yes:hover { opacity: 0.9; }
+
+    .btn-no {
+      background: #fff;
+      color: #2c2c2a;
+      left: 154px;
+      transition: left 0.05s, top 0.05s;
+      user-select: none;
+    }
+
+    .hint {
+      font-size: 0.78rem;
+      color: #b85a7e;
+      min-height: 18px;
+      font-style: italic;
+    }
+
+    /* Floating animation on cake */
+    .floating {
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-10px); }
+    }
+
+    /* Guest list */
+    .guest-list {
+      width: 100%;
+      background: #fff8fb;
+      border-radius: 12px;
+      padding: 10px 14px;
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1px solid #f0bbd0;
+    }
+
+    .guest-item {
+      display: flex;
+      align-items: center;
+      padding: 7px 0;
+      border-bottom: 1px solid #f5d7e5;
+      font-size: 0.92rem;
+      color: #2c2c2a;
+      gap: 8px;
+    }
+    .guest-item:last-child { border-bottom: none; }
+    .guest-name { flex: 1; text-align: left; }
+
+    .badge {
+      font-size: 0.75rem;
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-yes { background: #eaf3de; color: #3b6d11; }
+    .badge-no  { background: #fcebeb; color: #a32d2d; }
+
+    .empty-state {
+      font-size: 0.9rem;
+      color: #b4b2a9;
+      font-style: italic;
+      padding: 1rem 0;
+    }
+
+    /* Sparkles overlay */
+    #sparkles {
+      pointer-events: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 999;
+      overflow: hidden;
+    }
+    .sparkle {
+      position: absolute;
+      font-size: 1.4rem;
+      animation: fall linear forwards;
+    }
+    @keyframes fall {
+      0%   { transform: translateY(-30px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh)  rotate(360deg); opacity: 0; }
+    }
+
+    /* Pop-in animation */
+    .pop-in { animation: pop 0.5s cubic-bezier(.36,1.7,.58,1) both; }
+    @keyframes pop {
+      from { transform: scale(0); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- Screen 1: Enter name -->
+  <div class="screen active" id="screen-name">
+    <div class="confetti-row">🎈🎂🎁</div>
+    <h1>You're invited! 🥳</h1>
+    <p>Enter your name to RSVP to the party</p>
+    <input type="text" id="name-input" placeholder="Your name..." maxlength="40" />
+    <button class="btn-primary" onclick="goToQuestion()">Continue →</button>
+  </div>
+
+  <!-- Screen 2: Will you come? -->
+  <div class="screen" id="screen-question">
+    <div class="emoji-big floating">🎂</div>
+    <h1>Hey <span id="q-name" style="color:#d4537e"></span>!</h1>
+    <p style="font-size:1.1rem; color:#2c2c2a;">Will you come to my birthday? 🥳</p>
+    <div class="yesno-wrap" id="yesno-wrap">
+      <button class="btn-yes" onclick="sayYes()">Yes! 🎉</button>
+      <button class="btn-no" id="btn-no" onclick="noCaught()">No 😢</button>
+    </div>
+    <div class="hint" id="no-hint"></div>
+  </div>
+
+  <!-- Screen 3: Said yes -->
+  <div class="screen" id="screen-yes">
+    <div class="emoji-big pop-in">🥳</div>
+    <h1>Yay! <span id="yes-name" style="color:#d4537e"></span> is coming!</h1>
+    <p>Can't wait to celebrate with you! 🎈🎂🎁</p>
+    <div style="font-size:2rem; animation: bounce 0.8s infinite alternate">⭐✨🌟</div>
+    <button class="btn-primary" onclick="goToList()">See the guest list 📋</button>
+  </div>
+
+  <!-- Screen 4: Said no (if they somehow catch it) -->
+  <div class="screen" id="screen-no">
+    <div class="emoji-big">😭</div>
+    <h1><span id="no-name" style="color:#d4537e"></span> said no...</h1>
+    <p>We'll miss you! Maybe next time 💔</p>
+    <button class="btn-primary" onclick="goToList()">See the guest list 📋</button>
+  </div>
+
+  <!-- Screen 5: Guest list -->
+  <div class="screen" id="screen-list">
+    <div class="emoji-med">📋</div>
+    <h1>Guest list</h1>
+    <div class="guest-list" id="guest-list-el"></div>
+    <button class="btn-primary" onclick="restart()">Invite someone else</button>
+    <button class="btn-link" onclick="clearList()">Clear list</button>
+  </div>
+
+</div>
+
+<div id="sparkles"></div>
+
+<script>
+  const guests = JSON.parse(localStorage.getItem('bday_guests') || '[]');
+  let currentName = '';
+  let noMoves = 0;
+
+  const hints = [
+    '',
+    'Nice try! 😏',
+    'It keeps running! 🏃',
+    "You can't catch it! 😂",
+    'Give up and say yes! 🥺',
+    "It's way too fast for you 😎",
+    'Just click YES already!! 🎂'
+  ];
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+
+  function goToQuestion() {
+    const v = document.getElementById('name-input').value.trim();
+    if (!v) { document.getElementById('name-input').focus(); return; }
+    currentName = v;
+    document.getElementById('q-name').textContent = v;
+    noMoves = 0;
+    document.getElementById('no-hint').textContent = '';
+    resetNoBtn();
+    show('screen-question');
+  }
+
+  function resetNoBtn() {
+    const btn = document.getElementById('btn-no');
+    btn.style.left = '154px';
+    btn.style.top = '0px';
+  }
+
+  function runAway() {
+    const wrap = document.getElementById('yesno-wrap');
+    const btn  = document.getElementById('btn-no');
+    const card = wrap.closest('.screen');
+    const cardW = card.offsetWidth - 48;
+    const cardH = card.offsetHeight - 48;
+    const btnW = btn.offsetWidth;
+    const btnH = btn.offsetHeight;
+
+    const wrapRect = wrap.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
+
+    const maxLeft = cardW - btnW;
+    const maxTop  = cardH - btnH;
+
+    const offsetX = wrapRect.left - cardRect.left - 24;
+    const offsetY = wrapRect.top  - cardRect.top  - 24;
+
+    const x = Math.max(0, Math.floor(Math.random() * maxLeft) - offsetX);
+    const y = Math.max(-offsetY, Math.floor(Math.random() * maxTop) - offsetY);
+
+    btn.style.left = x + 'px';
+    btn.style.top  = y + 'px';
+    noMoves++;
+    document.getElementById('no-hint').textContent = hints[Math.min(noMoves, hints.length - 1)];
+  }
+
+  /* Run away on hover (desktop) and touch start (mobile) */
+  document.getElementById('btn-no').addEventListener('mousemove', runAway);
+  document.getElementById('btn-no').addEventListener('mouseover', runAway);
+  document.getElementById('btn-no').addEventListener('touchstart', function(e) {
+    e.preventDefault();
+    runAway();
+  }, { passive: false });
+  document.getElementById('btn-no').addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    runAway();
+  }, { passive: false });
+
+  function noCaught() {
+    /* Virtually impossible to trigger, but handle it gracefully */
+    saveGuest(currentName, false);
+    document.getElementById('no-name').textContent = currentName;
+    show('screen-no');
+  }
+
+  function sayYes() {
+    saveGuest(currentName, true);
+    document.getElementById('yes-name').textContent = currentName;
+    show('screen-yes');
+    launchSparkles();
+  }
+
+  function saveGuest(name, coming) {
+    guests.push({ name, coming, ts: Date.now() });
+    localStorage.setItem('bday_guests', JSON.stringify(guests));
+  }
+
+  function goToList() {
+    const el = document.getElementById('guest-list-el');
+    if (!guests.length) {
+      el.innerHTML = '<div class="empty-state">No guests yet!</div>';
+    } else {
+      el.innerHTML = guests.map(g =>
+        `<div class="guest-item">
+           <span class="guest-name">${esc(g.name)}</span>
+           <span class="badge ${g.coming ? 'badge-yes' : 'badge-no'}">
+             ${g.coming ? 'Coming 🎉' : "Can't come 😢"}
+           </span>
+         </div>`
+      ).join('');
+    }
+    show('screen-list');
+  }
+
+  function esc(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function restart() {
+    document.getElementById('name-input').value = '';
+    show('screen-name');
+  }
+
+  function clearList() {
+    if (confirm('Clear the entire guest list?')) {
+      guests.length = 0;
+      localStorage.setItem('bday_guests', '[]');
+      goToList();
+    }
+  }
+
+  function launchSparkles() {
+    const wrap = document.getElementById('sparkles');
+    const emojis = ['🎉', '✨', '🎈', '⭐', '🌟', '💖', '🎊', '🥳'];
+    for (let i = 0; i < 22; i++) {
+      setTimeout(() => {
+        const s = document.createElement('span');
+        s.className = 'sparkle';
+        s.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+        s.style.left = Math.random() * 95 + '%';
+        const dur = 1.2 + Math.random() * 1.2;
+        s.style.animationDuration = dur + 's';
+        wrap.appendChild(s);
+        setTimeout(() => s.remove(), dur * 1000 + 100);
+      }, i * 70);
+    }
+  }
+
+  document.getElementById('name-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') goToQuestion();
+  });
+</script>
+</body>
+</html>
