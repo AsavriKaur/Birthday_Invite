@@ -15,7 +15,6 @@
       align-items: center;
       justify-content: center;
       padding: 1rem;
-      touch-action: manipulation;
     }
 
     #app {
@@ -35,19 +34,17 @@
       width: 100%;
       background: #fff;
       border-radius: 20px;
-      padding: 2.5rem 1.5rem;
+      padding: 2.5rem 2rem;
       box-shadow: 0 4px 32px rgba(212, 83, 126, 0.12);
       text-align: center;
-      position: relative;
-      overflow: hidden;
     }
     .screen.active { display: flex; }
 
-    h1 { font-size: 1.4rem; font-weight: 600; color: #2c2c2a; }
+    h1 { font-size: 1.5rem; font-weight: 600; color: #2c2c2a; }
     p  { font-size: 1rem; color: #5f5e5a; }
 
-    .emoji-big    { font-size: 3.5rem; }
-    .emoji-med    { font-size: 2.5rem; }
+    .emoji-big   { font-size: 3.5rem; }
+    .emoji-med   { font-size: 2.5rem; }
     .confetti-row { font-size: 2rem; letter-spacing: 6px; animation: bounce 0.8s ease-in-out infinite alternate; }
 
     @keyframes bounce {
@@ -57,7 +54,7 @@
 
     input[type=text] {
       width: 100%;
-      padding: 12px 16px;
+      padding: 11px 16px;
       font-size: 1rem;
       border-radius: 10px;
       border: 1.5px solid #f0bbd0;
@@ -65,7 +62,6 @@
       transition: border-color 0.2s;
       background: #fff8fb;
       color: #2c2c2a;
-      -webkit-appearance: none;
     }
     input[type=text]:focus { border-color: #d4537e; }
 
@@ -73,14 +69,12 @@
       background: #d4537e;
       color: #fff;
       border: none;
-      padding: 13px 32px;
+      padding: 11px 32px;
       border-radius: 10px;
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
       transition: opacity 0.15s, transform 0.1s;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
     }
     .btn-primary:hover  { opacity: 0.88; }
     .btn-primary:active { transform: scale(0.97); }
@@ -92,47 +86,41 @@
       font-size: 0.85rem;
       cursor: pointer;
       text-decoration: underline;
-      touch-action: manipulation;
     }
 
-    /* Yes/No area — takes full width, fixed height for roaming space */
-    .yesno-area {
+    /* Yes/No buttons */
+    .yesno-wrap {
       position: relative;
-      width: 100%;
-      height: 180px;
+      width: 284px;
+      height: 56px;
     }
 
     .btn-yes, .btn-no {
       width: 130px;
-      padding: 13px 0;
+      padding: 12px 0;
       border-radius: 10px;
       font-size: 1rem;
       font-weight: 600;
       cursor: pointer;
       border: 1.5px solid #ccc;
+      transition: opacity 0.15s;
       position: absolute;
-      -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
+      top: 0;
     }
-
     .btn-yes {
       background: #639922;
       color: #fff;
       border-color: #639922;
-      left: 50%;
-      transform: translateX(-73px); /* centers it slightly left */
-      top: 60px;
-      z-index: 2;
+      left: 0;
     }
     .btn-yes:hover { opacity: 0.9; }
 
     .btn-no {
       background: #fff;
       color: #2c2c2a;
-      /* initial pos set by JS */
-      z-index: 3;
+      left: 154px;
+      transition: left 0.05s, top 0.05s;
       user-select: none;
-      transition: none; /* instant teleport */
     }
 
     .hint {
@@ -142,12 +130,16 @@
       font-style: italic;
     }
 
-    .floating { animation: float 3s ease-in-out infinite; }
+    /* Floating animation on cake */
+    .floating {
+      animation: float 3s ease-in-out infinite;
+    }
     @keyframes float {
       0%, 100% { transform: translateY(0); }
       50%       { transform: translateY(-10px); }
     }
 
+    /* Guest list */
     .guest-list {
       width: 100%;
       background: #fff8fb;
@@ -156,7 +148,6 @@
       max-height: 220px;
       overflow-y: auto;
       border: 1px solid #f0bbd0;
-      -webkit-overflow-scrolling: touch;
     }
 
     .guest-item {
@@ -188,6 +179,7 @@
       padding: 1rem 0;
     }
 
+    /* Sparkles overlay */
     #sparkles {
       pointer-events: none;
       position: fixed;
@@ -203,9 +195,10 @@
     }
     @keyframes fall {
       0%   { transform: translateY(-30px) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+      100% { transform: translateY(110vh)  rotate(360deg); opacity: 0; }
     }
 
+    /* Pop-in animation */
     .pop-in { animation: pop 0.5s cubic-bezier(.36,1.7,.58,1) both; }
     @keyframes pop {
       from { transform: scale(0); opacity: 0; }
@@ -217,6 +210,7 @@
 
 <div id="app">
 
+  <!-- Screen 1: Enter name -->
   <div class="screen active" id="screen-name">
     <div class="confetti-row">🎈🎂🎁</div>
     <h1>You're invited! 🥳</h1>
@@ -225,17 +219,19 @@
     <button class="btn-primary" onclick="goToQuestion()">Continue →</button>
   </div>
 
+  <!-- Screen 2: Will you come? -->
   <div class="screen" id="screen-question">
     <div class="emoji-big floating">🎂</div>
     <h1>Hey <span id="q-name" style="color:#d4537e"></span>!</h1>
     <p style="font-size:1.1rem; color:#2c2c2a;">Will you come to my birthday? 🥳</p>
-    <div class="yesno-area" id="yesno-area">
+    <div class="yesno-wrap" id="yesno-wrap">
       <button class="btn-yes" onclick="sayYes()">Yes! 🎉</button>
       <button class="btn-no" id="btn-no" onclick="noCaught()">No 😢</button>
     </div>
     <div class="hint" id="no-hint"></div>
   </div>
 
+  <!-- Screen 3: Said yes -->
   <div class="screen" id="screen-yes">
     <div class="emoji-big pop-in">🥳</div>
     <h1>Yay! <span id="yes-name" style="color:#d4537e"></span> is coming!</h1>
@@ -244,6 +240,7 @@
     <button class="btn-primary" onclick="goToList()">See the guest list 📋</button>
   </div>
 
+  <!-- Screen 4: Said no (if they somehow catch it) -->
   <div class="screen" id="screen-no">
     <div class="emoji-big">😭</div>
     <h1><span id="no-name" style="color:#d4537e"></span> said no...</h1>
@@ -251,6 +248,7 @@
     <button class="btn-primary" onclick="goToList()">See the guest list 📋</button>
   </div>
 
+  <!-- Screen 5: Guest list -->
   <div class="screen" id="screen-list">
     <div class="emoji-med">📋</div>
     <h1>Guest list</h1>
@@ -267,7 +265,6 @@
   const guests = JSON.parse(localStorage.getItem('bday_guests') || '[]');
   let currentName = '';
   let noMoves = 0;
-  let lastRunTime = 0;
 
   const hints = [
     '',
@@ -296,93 +293,47 @@
   }
 
   function resetNoBtn() {
-    const btn  = document.getElementById('btn-no');
-    const area = document.getElementById('yesno-area');
-    const aW   = area.offsetWidth;
-    const centerX = aW / 2;
-    btn.style.left = (centerX + 8) + 'px';
-    btn.style.top  = '60px';
+    const btn = document.getElementById('btn-no');
+    btn.style.left = '154px';
+    btn.style.top = '0px';
   }
 
-  function runAwayFrom(fingerX, fingerY) {
-    const now = Date.now();
-    if (now - lastRunTime < 50) return;
-    lastRunTime = now;
-
+  function runAway() {
+    const wrap = document.getElementById('yesno-wrap');
     const btn  = document.getElementById('btn-no');
-    const area = document.getElementById('yesno-area');
-    const aRect = area.getBoundingClientRect();
-    const btnW  = btn.offsetWidth;
-    const btnH  = btn.offsetHeight;
-    const maxX  = area.offsetWidth  - btnW;
-    const maxY  = area.offsetHeight - btnH;
+    const card = wrap.closest('.screen');
+    const cardW = card.offsetWidth - 48;
+    const cardH = card.offsetHeight - 48;
+    const btnW = btn.offsetWidth;
+    const btnH = btn.offsetHeight;
 
-    const relX = fingerX - aRect.left;
-    const relY = fingerY - aRect.top;
+    const wrapRect = wrap.getBoundingClientRect();
+    const cardRect = card.getBoundingClientRect();
 
-    const curLeft = parseFloat(btn.style.left) || (area.offsetWidth / 2 + 8);
-    const curTop  = parseFloat(btn.style.top)  || 60;
-    const cx = curLeft + btnW / 2;
-    const cy = curTop  + btnH / 2;
+    const maxLeft = cardW - btnW;
+    const maxTop  = cardH - btnH;
 
-    let dx = cx - relX;
-    let dy = cy - relY;
-    const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-    dx /= dist;
-    dy /= dist;
+    const offsetX = wrapRect.left - cardRect.left - 24;
+    const offsetY = wrapRect.top  - cardRect.top  - 24;
 
-    const jump = 130 + Math.random() * 50;
-    let nx = curLeft + dx * jump + (Math.random() - 0.5) * 60;
-    let ny = curTop  + dy * jump + (Math.random() - 0.5) * 60;
+    const x = Math.max(0, Math.floor(Math.random() * maxLeft) - offsetX);
+    const y = Math.max(-offsetY, Math.floor(Math.random() * maxTop) - offsetY);
 
-    nx = Math.max(0, Math.min(nx, maxX));
-    ny = Math.max(0, Math.min(ny, maxY));
-
-    btn.style.left = nx + 'px';
-    btn.style.top  = ny + 'px';
+    btn.style.left = x + 'px';
+    btn.style.top  = y + 'px';
     noMoves++;
     document.getElementById('no-hint').textContent = hints[Math.min(noMoves, hints.length - 1)];
   }
 
-  function runAway(e) {
-    runAwayFrom(e.clientX, e.clientY);
-  }
-
-  const noBtn = document.getElementById('btn-no');
-
-  noBtn.addEventListener('mouseover', runAway);
-  noBtn.addEventListener('mousemove', runAway);
-
-  document.getElementById('yesno-area').addEventListener('touchmove', function(e) {
+  document.getElementById('btn-no').addEventListener('mousemove', runAway);
+  document.getElementById('btn-no').addEventListener('mouseover', runAway);
+  document.getElementById('btn-no').addEventListener('touchstart', function(e) {
     e.preventDefault();
-    const t = e.touches[0];
-    const btn = document.getElementById('btn-no');
-    const bRect = btn.getBoundingClientRect();
-    const pad = 60; 
-    if (
-      t.clientX > bRect.left  - pad &&
-      t.clientX < bRect.right + pad &&
-      t.clientY > bRect.top   - pad &&
-      t.clientY < bRect.bottom + pad
-    ) {
-      runAwayFrom(t.clientX, t.clientY);
-    }
+    runAway();
   }, { passive: false });
-
-  document.getElementById('yesno-area').addEventListener('touchstart', function(e) {
-    const t = e.touches[0];
-    const btn = document.getElementById('btn-no');
-    const bRect = btn.getBoundingClientRect();
-    const pad = 60;
-    if (
-      t.clientX > bRect.left  - pad &&
-      t.clientX < bRect.right + pad &&
-      t.clientY > bRect.top   - pad &&
-      t.clientY < bRect.bottom + pad
-    ) {
-      e.preventDefault();
-      runAwayFrom(t.clientX, t.clientY);
-    }
+  document.getElementById('btn-no').addEventListener('touchmove', function(e) {
+    e.preventDefault();
+    runAway();
   }, { passive: false });
 
   function noCaught() {
@@ -439,7 +390,7 @@
 
   function launchSparkles() {
     const wrap = document.getElementById('sparkles');
-    const emojis = ['🎉','✨','🎈','⭐','🌟','💖','🎊','🥳'];
+    const emojis = ['🎉', '✨', '🎈', '⭐', '🌟', '💖', '🎊', '🥳'];
     for (let i = 0; i < 22; i++) {
       setTimeout(() => {
         const s = document.createElement('span');
@@ -457,8 +408,6 @@
   document.getElementById('name-input').addEventListener('keydown', e => {
     if (e.key === 'Enter') goToQuestion();
   });
-
-  window.addEventListener('resize', resetNoBtn);
 </script>
 </body>
 </html>
