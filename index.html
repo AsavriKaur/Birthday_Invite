@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Birthday Invitation 🎂</title>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -15,12 +15,12 @@
       align-items: center;
       justify-content: center;
       padding: 1rem;
+      touch-action: manipulation;
     }
 
     #app {
       width: 100%;
       max-width: 480px;
-      min-height: 420px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -40,11 +40,18 @@
     }
     .screen.active { display: flex; }
 
+    #screen-question {
+      position: relative;
+      overflow: hidden;
+      min-height: 400px;
+      padding-bottom: 2.5rem;
+    }
+
     h1 { font-size: 1.5rem; font-weight: 600; color: #2c2c2a; }
     p  { font-size: 1rem; color: #5f5e5a; }
 
-    .emoji-big   { font-size: 3.5rem; }
-    .emoji-med   { font-size: 2.5rem; }
+    .emoji-big    { font-size: 3.5rem; }
+    .emoji-med    { font-size: 2.5rem; }
     .confetti-row { font-size: 2rem; letter-spacing: 6px; animation: bounce 0.8s ease-in-out infinite alternate; }
 
     @keyframes bounce {
@@ -62,6 +69,7 @@
       transition: border-color 0.2s;
       background: #fff8fb;
       color: #2c2c2a;
+      -webkit-appearance: none;
     }
     input[type=text]:focus { border-color: #d4537e; }
 
@@ -75,6 +83,8 @@
       font-weight: 600;
       cursor: pointer;
       transition: opacity 0.15s, transform 0.1s;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
     .btn-primary:hover  { opacity: 0.88; }
     .btn-primary:active { transform: scale(0.97); }
@@ -88,14 +98,23 @@
       text-decoration: underline;
     }
 
-    /* Yes/No buttons */
-    .yesno-wrap {
-      position: relative;
-      width: 284px;
-      height: 56px;
+    .btn-yes {
+      width: 130px;
+      padding: 12px 0;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid #639922;
+      background: #639922;
+      color: #fff;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
     }
+    .btn-yes:hover { opacity: 0.9; }
 
-    .btn-yes, .btn-no {
+    /* No lives inside #screen-question with position:absolute */
+    .btn-no {
       width: 130px;
       padding: 12px 0;
       border-radius: 10px;
@@ -103,24 +122,12 @@
       font-weight: 600;
       cursor: pointer;
       border: 1.5px solid #ccc;
-      transition: opacity 0.15s;
-      position: absolute;
-      top: 0;
-    }
-    .btn-yes {
-      background: #639922;
-      color: #fff;
-      border-color: #639922;
-      left: 0;
-    }
-    .btn-yes:hover { opacity: 0.9; }
-
-    .btn-no {
       background: #fff;
       color: #2c2c2a;
-      left: 154px;
-      transition: left 0.05s, top 0.05s;
+      position: absolute;
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: none;
     }
 
     .hint {
@@ -128,18 +135,19 @@
       color: #b85a7e;
       min-height: 18px;
       font-style: italic;
+      /* pinned so it doesn't shift layout */
+      position: absolute;
+      bottom: 1rem;
+      left: 0; right: 0;
+      text-align: center;
     }
 
-    /* Floating animation on cake */
-    .floating {
-      animation: float 3s ease-in-out infinite;
-    }
+    .floating { animation: float 3s ease-in-out infinite; }
     @keyframes float {
       0%, 100% { transform: translateY(0); }
       50%       { transform: translateY(-10px); }
     }
 
-    /* Guest list */
     .guest-list {
       width: 100%;
       background: #fff8fb;
@@ -148,6 +156,7 @@
       max-height: 220px;
       overflow-y: auto;
       border: 1px solid #f0bbd0;
+      -webkit-overflow-scrolling: touch;
     }
 
     .guest-item {
@@ -170,7 +179,6 @@
       white-space: nowrap;
     }
     .badge-yes { background: #eaf3de; color: #3b6d11; }
-    .badge-no  { background: #fcebeb; color: #a32d2d; }
 
     .empty-state {
       font-size: 0.9rem;
@@ -179,7 +187,6 @@
       padding: 1rem 0;
     }
 
-    /* Sparkles overlay */
     #sparkles {
       pointer-events: none;
       position: fixed;
@@ -195,10 +202,9 @@
     }
     @keyframes fall {
       0%   { transform: translateY(-30px) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(110vh)  rotate(360deg); opacity: 0; }
+      100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
     }
 
-    /* Pop-in animation */
     .pop-in { animation: pop 0.5s cubic-bezier(.36,1.7,.58,1) both; }
     @keyframes pop {
       from { transform: scale(0); opacity: 0; }
@@ -207,10 +213,8 @@
   </style>
 </head>
 <body>
-
 <div id="app">
 
-  <!-- Screen 1: Enter name -->
   <div class="screen active" id="screen-name">
     <div class="confetti-row">🎈🎂🎁</div>
     <h1>You're invited! 🥳</h1>
@@ -219,36 +223,23 @@
     <button class="btn-primary" onclick="goToQuestion()">Continue →</button>
   </div>
 
-  <!-- Screen 2: Will you come? -->
   <div class="screen" id="screen-question">
     <div class="emoji-big floating">🎂</div>
     <h1>Hey <span id="q-name" style="color:#d4537e"></span>!</h1>
-    <p style="font-size:1.1rem; color:#2c2c2a;">Will you come to my birthday? 🥳</p>
-    <div class="yesno-wrap" id="yesno-wrap">
-      <button class="btn-yes" onclick="sayYes()">Yes! 🎉</button>
-      <button class="btn-no" id="btn-no" onclick="noCaught()">No 😢</button>
-    </div>
+    <p style="font-size:1.1rem;color:#2c2c2a;">Will you come to my birthday? 🥳</p>
+    <button class="btn-yes" onclick="sayYes()">Yes! 🎉</button>
+    <button class="btn-no" id="btn-no">No 😢</button>
     <div class="hint" id="no-hint"></div>
   </div>
 
-  <!-- Screen 3: Said yes -->
   <div class="screen" id="screen-yes">
     <div class="emoji-big pop-in">🥳</div>
     <h1>Yay! <span id="yes-name" style="color:#d4537e"></span> is coming!</h1>
     <p>Can't wait to celebrate with you! 🎈🎂🎁</p>
-    <div style="font-size:2rem; animation: bounce 0.8s infinite alternate">⭐✨🌟</div>
+    <div style="font-size:2rem;animation:bounce 0.8s infinite alternate">⭐✨🌟</div>
     <button class="btn-primary" onclick="goToList()">See the guest list 📋</button>
   </div>
 
-  <!-- Screen 4: Said no (if they somehow catch it) -->
-  <div class="screen" id="screen-no">
-    <div class="emoji-big">😭</div>
-    <h1><span id="no-name" style="color:#d4537e"></span> said no...</h1>
-    <p>We'll miss you! Maybe next time 💔</p>
-    <button class="btn-primary" onclick="goToList()">See the guest list 📋</button>
-  </div>
-
-  <!-- Screen 5: Guest list -->
   <div class="screen" id="screen-list">
     <div class="emoji-med">📋</div>
     <h1>Guest list</h1>
@@ -258,23 +249,26 @@
   </div>
 
 </div>
-
 <div id="sparkles"></div>
 
 <script>
-  const guests = JSON.parse(localStorage.getItem('bday_guests') || '[]');
-  let currentName = '';
-  let noMoves = 0;
+  const guests = JSON.parse((function(){ try { return localStorage.getItem('bday_guests')||'[]'; } catch(e){ return '[]'; } })());
+  let currentName = '', noMoves = 0, lastRun = 0;
+  const noBtn = document.getElementById('btn-no');
+  const card  = document.getElementById('screen-question');
 
   const hints = [
-    '',
     'Nice try! 😏',
     'It keeps running! 🏃',
     "You can't catch it! 😂",
     'Give up and say yes! 🥺',
     "It's way too fast for you 😎",
-    'Just click YES already!! 🎂'
+    'Just click YES already!! 🎂',
+    'Still running... 🌀',
+    'Are you even trying? 😂',
   ];
+
+  function storageSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
 
   function show(id) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -288,59 +282,108 @@
     document.getElementById('q-name').textContent = v;
     noMoves = 0;
     document.getElementById('no-hint').textContent = '';
-    resetNoBtn();
     show('screen-question');
+    requestAnimationFrame(placeNoInitial);
   }
 
-  function resetNoBtn() {
-    const btn = document.getElementById('btn-no');
-    btn.style.left = '154px';
-    btn.style.top = '0px';
+  function placeNoInitial() {
+    const cW   = card.offsetWidth;
+    const btnW = noBtn.offsetWidth;
+    const btnH = noBtn.offsetHeight;
+    const yes  = document.querySelector('.btn-yes');
+    const yR   = yes.getBoundingClientRect();
+    const cR   = card.getBoundingClientRect();
+
+    const top     = yR.top - cR.top;
+    const gap     = 16;
+    const totalW  = btnW * 2 + gap;
+    const startX  = (cW - totalW) / 2;
+
+    
+    yes.style.position = 'absolute';
+    yes.style.left = startX + 'px';
+    yes.style.top  = top + 'px';
+
+    noBtn.style.left = (startX + btnW + gap) + 'px';
+    noBtn.style.top  = top + 'px';
   }
 
-  function runAway() {
-    const wrap = document.getElementById('yesno-wrap');
-    const btn  = document.getElementById('btn-no');
-    const card = wrap.closest('.screen');
-    const cardW = card.offsetWidth - 48;
-    const cardH = card.offsetHeight - 48;
-    const btnW = btn.offsetWidth;
-    const btnH = btn.offsetHeight;
+  function runAwayFrom(px, py) {
+    const now = Date.now();
+    if (now - lastRun < 40) return;
+    lastRun = now;
 
-    const wrapRect = wrap.getBoundingClientRect();
-    const cardRect = card.getBoundingClientRect();
+    const cR   = card.getBoundingClientRect();
+    const btnW = noBtn.offsetWidth;
+    const btnH = noBtn.offsetHeight;
 
-    const maxLeft = cardW - btnW;
-    const maxTop  = cardH - btnH;
+    const curL = parseFloat(noBtn.style.left) || 0;
+    const curT = parseFloat(noBtn.style.top)  || 0;
+    const bcx  = curL + btnW / 2;
+    const bcy  = curT + btnH / 2;
 
-    const offsetX = wrapRect.left - cardRect.left - 24;
-    const offsetY = wrapRect.top  - cardRect.top  - 24;
+    const lx = px - cR.left;
+    const ly = py - cR.top;
 
-    const x = Math.max(0, Math.floor(Math.random() * maxLeft) - offsetX);
-    const y = Math.max(-offsetY, Math.floor(Math.random() * maxTop) - offsetY);
+    let dx = bcx - lx, dy = bcy - ly;
+    const d = Math.sqrt(dx*dx + dy*dy) || 1;
+    dx /= d; dy /= d;
 
-    btn.style.left = x + 'px';
-    btn.style.top  = y + 'px';
+    const jump = 120 + Math.random() * 80;
+    let nx = curL + dx * jump + (Math.random() - 0.5) * 50;
+    let ny = curT + dy * jump + (Math.random() - 0.5) * 50;
+
+    const pad  = 8;
+    const maxX = cR.width  - btnW - pad;
+    const maxY = cR.height - btnH - pad - 32;
+
+    if (nx < pad)  nx = pad  + Math.random() * (maxX * 0.4);
+    if (nx > maxX) nx = maxX - Math.random() * (maxX * 0.4);
+    if (ny < pad)  ny = pad  + Math.random() * (maxY * 0.4);
+    if (ny > maxY) ny = maxY - Math.random() * (maxY * 0.4);
+
+    noBtn.style.left = nx + 'px';
+    noBtn.style.top  = ny + 'px';
+
     noMoves++;
-    document.getElementById('no-hint').textContent = hints[Math.min(noMoves, hints.length - 1)];
+    document.getElementById('no-hint').textContent = hints[noMoves % hints.length];
   }
 
-  document.getElementById('btn-no').addEventListener('mousemove', runAway);
-  document.getElementById('btn-no').addEventListener('mouseover', runAway);
-  document.getElementById('btn-no').addEventListener('touchstart', function(e) {
-    e.preventDefault();
-    runAway();
-  }, { passive: false });
-  document.getElementById('btn-no').addEventListener('touchmove', function(e) {
-    e.preventDefault();
-    runAway();
+  const PAD = 0; 
+
+  function nearBtn(cx, cy) {
+    const cR   = card.getBoundingClientRect();
+    const curL = parseFloat(noBtn.style.left) || 0;
+    const curT = parseFloat(noBtn.style.top)  || 0;
+    /* btn rect in viewport coords */
+    const bL = cR.left + curL;
+    const bT = cR.top  + curT;
+    const bR = bL + noBtn.offsetWidth;
+    const bB = bT + noBtn.offsetHeight;
+    return cx > bL - PAD && cx < bR + PAD && cy > bT - PAD && cy < bB + PAD;
+  }
+
+  card.addEventListener('mousemove', function(e) {
+    if (nearBtn(e.clientX, e.clientY)) runAwayFrom(e.clientX, e.clientY);
+  });
+
+  card.addEventListener('touchmove', function(e) {
+    const t = e.touches[0];
+    if (nearBtn(t.clientX, t.clientY)) {
+      e.preventDefault();
+      runAwayFrom(t.clientX, t.clientY);
+    }
   }, { passive: false });
 
-  function noCaught() {
-    saveGuest(currentName, false);
-    document.getElementById('no-name').textContent = currentName;
-    show('screen-no');
-  }
+  card.addEventListener('touchstart', function(e) {
+    const t = e.touches[0];
+    if (nearBtn(t.clientX, t.clientY)) {
+      e.preventDefault();
+      runAwayFrom(t.clientX, t.clientY);
+    }
+  }, { passive: false });
+
+  noBtn.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); });
 
   function sayYes() {
     saveGuest(currentName, true);
@@ -351,29 +394,18 @@
 
   function saveGuest(name, coming) {
     guests.push({ name, coming, ts: Date.now() });
-    localStorage.setItem('bday_guests', JSON.stringify(guests));
+    storageSet('bday_guests', JSON.stringify(guests));
   }
 
   function goToList() {
     const el = document.getElementById('guest-list-el');
-    if (!guests.length) {
-      el.innerHTML = '<div class="empty-state">No guests yet!</div>';
-    } else {
-      el.innerHTML = guests.map(g =>
-        `<div class="guest-item">
-           <span class="guest-name">${esc(g.name)}</span>
-           <span class="badge ${g.coming ? 'badge-yes' : 'badge-no'}">
-             ${g.coming ? 'Coming 🎉' : "Can't come 😢"}
-           </span>
-         </div>`
-      ).join('');
-    }
+    el.innerHTML = guests.length
+      ? guests.map(g => `<div class="guest-item"><span class="guest-name">${esc(g.name)}</span><span class="badge badge-yes">Coming 🎉</span></div>`).join('')
+      : '<div class="empty-state">No guests yet!</div>';
     show('screen-list');
   }
 
-  function esc(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
+  function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
   function restart() {
     document.getElementById('name-input').value = '';
@@ -383,14 +415,14 @@
   function clearList() {
     if (confirm('Clear the entire guest list?')) {
       guests.length = 0;
-      localStorage.setItem('bday_guests', '[]');
+      storageSet('bday_guests', '[]');
       goToList();
     }
   }
 
   function launchSparkles() {
     const wrap = document.getElementById('sparkles');
-    const emojis = ['🎉', '✨', '🎈', '⭐', '🌟', '💖', '🎊', '🥳'];
+    const emojis = ['🎉','✨','🎈','⭐','🌟','💖','🎊','🥳'];
     for (let i = 0; i < 22; i++) {
       setTimeout(() => {
         const s = document.createElement('span');
